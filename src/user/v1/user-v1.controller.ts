@@ -1,18 +1,26 @@
-import { Body, Controller, HttpStatus, Post } from '@nestjs/common';
+import { Body, Controller, HttpStatus, Inject, Post } from '@nestjs/common';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { SuccessApiResponseDTO } from 'src/api-utils/api.responses';
-import { UserDTO, UserRequestDTO } from '../User.dto';
+import { USER_SERVICE } from '../user-service.factory';
+import { IUserService } from '../user-service.interface';
+import { UserDTO, UserRequestDTO } from '../user.dto';
 
 @ApiTags('user')
 @Controller({ path: 'user', version: '1' })
 export class UserV1Controller {
+  constructor(
+    @Inject(USER_SERVICE) private readonly userService: IUserService,
+  ) {}
+
   @Post()
   @ApiResponse({ status: 500, type: UserDTO })
-  createUser(@Body() user: UserRequestDTO): SuccessApiResponseDTO<UserDTO> {
-    // TODO implement create user
+  async createUser(
+    @Body() user: UserRequestDTO,
+  ): Promise<SuccessApiResponseDTO<UserDTO>> {
+    const newUser = await this.userService.createUser(user);
     const response = new SuccessApiResponseDTO<UserDTO>()
       .setStatus(HttpStatus.CREATED)
-      .setData({ ...user, id: 1 });
+      .setData(newUser);
     return response;
   }
 }

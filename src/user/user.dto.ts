@@ -7,6 +7,7 @@ const UserBaseSchema = z.object({
 const CreatedUserSchema = UserBaseSchema.extend({
   id: z.number().int().describe('Unique identifier for the user'),
 });
-// class is required for using DTO as a type
+
+// class is required for using DTO as a type in controller swagger decorators
 export class UserRequestDTO extends createZodDto(UserBaseSchema) {}
 export class UserDTO extends createZodDto(CreatedUserSchema) {}

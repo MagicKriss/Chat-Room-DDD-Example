@@ -6,6 +6,7 @@ import { AllExceptionFilter } from './api-utils/all-exception.filter';
 import { ZodValidationExceptionFilter } from './api-utils/zod-vaidation-exception.filter';
 import { AppModule } from './app.module';
 import { GLOBAL_API_PREFIX } from './constants';
+import { PrismaService } from './storage/prisma-service/prisma.service';
 
 function swaggerSetup(app: INestApplication) {
   const config = new DocumentBuilder()
@@ -16,6 +17,11 @@ function swaggerSetup(app: INestApplication) {
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup(GLOBAL_API_PREFIX, app, document);
+}
+
+async function enablePrismaShudtownHooks(app: INestApplication) {
+  const prismaService = app.get(PrismaService);
+  await prismaService.enableShutdownHooks(app);
 }
 
 async function bootstrap() {
@@ -34,6 +40,8 @@ async function bootstrap() {
     type: VersioningType.URI,
   });
   swaggerSetup(app);
+
+  await enablePrismaShudtownHooks(app);
 
   await app.listen(3000);
 }
