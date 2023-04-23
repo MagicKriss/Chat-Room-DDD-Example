@@ -1,0 +1,14 @@
+version: '3'
+services:
+  chat-room-api:
+    image: 'node:20-alpine'
+    hostname: 'chat-room-api'
+    container_name: 'chat-room-api'
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - .:/app
+    working_dir: /app
+    command: 'npm run start:dev'
+    ports:
+      - '3000:3000'
