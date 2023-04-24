@@ -1,5 +1,6 @@
 import { createZodDto } from 'nestjs-zod';
 import { z } from 'nestjs-zod/z';
+import { parseQueryParam } from 'src/api-utils/validation.utils';
 
 const MessageSchema = z.object({
   id: z.number().int().positive().describe('Unique identifier for the message'),
@@ -32,16 +33,22 @@ const SendMessageSchema = z.object({
 
 export class SendMessageRequestDto extends createZodDto(SendMessageSchema) {}
 
-const GetLatestMessagesSchema = z.object({
-  roomId: z.number().int().positive().describe('Unique identifier the room'),
-  count: z
+const IdParser = z.preprocess(
+  (val) => Number(val),
+  z.number().int().positive().describe('Unique identifier'),
+);
+
+const MessageCountParser = z.preprocess(
+  (val) => Number(val),
+  z
     .number()
     .int()
     .positive()
     .max(100, 'Maximum number of messages to return is 100')
+    .default(10)
     .describe('Number of messages to return'),
-});
+);
 
-export class GetLatestMessagesRequestDto extends createZodDto(
-  GetLatestMessagesSchema,
-) {}
+export const parseId = (id: unknown) => parseQueryParam(IdParser, id);
+export const parseMessageCount = (count: unknown) =>
+  parseQueryParam(MessageCountParser, count);

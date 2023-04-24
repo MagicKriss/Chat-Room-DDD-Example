@@ -14,7 +14,12 @@ import {
 } from 'src/api-utils/api.responses';
 import { USER_SERVICE } from '../user-service.factory';
 import { IUserService } from '../user-service.interface';
-import { UserDTO, UserRequestDTO } from '../user.dto';
+import {
+  UserDTO,
+  UserRequestDTO,
+  parseUserEmail,
+  parseUserId,
+} from '../user.dto';
 
 @ApiTags('user')
 @Controller({ path: 'user', version: '1' })
@@ -44,8 +49,17 @@ export class UserV1Controller {
   @Get('get-by-id')
   @ApiResponse({ status: HttpStatus.OK, type: UserDTO })
   async getUserById(
-    @Query('id') id: number,
+    @Query('id') inputId: number,
   ): Promise<SuccessApiResponseDTO<UserDTO> | ErrorApiResponseDTO> {
+    const parsedId = parseUserId(inputId);
+
+    if (!parsedId.ok) {
+      const response = new ErrorApiResponseDTO()
+        .setStatus(HttpStatus.BAD_REQUEST)
+        .setMessage(parsedId.error);
+      return response;
+    }
+    const id = parsedId.value;
     const result = await this.userService.getUserById(id);
     if (result.ok) {
       const response = new SuccessApiResponseDTO<UserDTO>()
@@ -61,7 +75,16 @@ export class UserV1Controller {
 
   @Get('get-by-email')
   @ApiResponse({ status: HttpStatus.OK, type: UserDTO })
-  async getUserByEmail(@Query('email') email: string) {
+  async getUserByEmail(@Query('email') inputEmail: string) {
+    const parsedEmail = parseUserEmail(inputEmail);
+    if (!parsedEmail.ok) {
+      const response = new ErrorApiResponseDTO()
+        .setStatus(HttpStatus.BAD_REQUEST)
+        .setMessage(parsedEmail.error);
+      return response;
+    }
+    const email = parsedEmail.value;
+
     const result = await this.userService.getUserByEmail(email);
     if (result.ok) {
       const response = new SuccessApiResponseDTO<UserDTO>()

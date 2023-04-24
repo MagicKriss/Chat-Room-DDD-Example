@@ -20,9 +20,10 @@ import {
   CreateChatroomRequestDTO,
 } from '../chatroom.dto';
 import {
-  GetLatestMessagesRequestDto,
   MessageDto,
   SendMessageRequestDto,
+  parseId,
+  parseMessageCount,
 } from '../message.dto';
 
 @ApiTags('chat')
@@ -85,10 +86,30 @@ export class ChatroomV1Controller {
 
   @Get('get-latest-messages')
   @ApiResponse({ status: HttpStatus.OK, type: MessageDto, isArray: true })
-  async getLatestRoomMessages(@Query() query: GetLatestMessagesRequestDto) {
+  async getLatestRoomMessages(
+    @Query('roomId') inputRoomId: number,
+    @Query('count') inputCount: number,
+  ) {
+    const parsedRoomId = parseId(inputRoomId);
+    if (!parsedRoomId.ok) {
+      const response = new ErrorApiResponseDTO()
+        .setStatus(HttpStatus.BAD_REQUEST)
+        .setMessage(parsedRoomId.error);
+      return response;
+    }
+    const parsedCount = parseMessageCount(inputCount);
+    if (!parsedCount.ok) {
+      const response = new ErrorApiResponseDTO()
+        .setStatus(HttpStatus.BAD_REQUEST)
+        .setMessage(parsedCount.error);
+      return response;
+    }
+
+    const roomId = parsedRoomId.value;
+    const count = parsedCount.value;
     const result = await this.chatroomService.getLatestRoomMessages(
-      query.roomId,
-      query.count,
+      roomId,
+      count,
     );
     if (result.ok) {
       const response = new SuccessApiResponseDTO<MessageDto[]>()
