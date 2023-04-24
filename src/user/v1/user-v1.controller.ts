@@ -4,8 +4,8 @@ import {
   Get,
   HttpStatus,
   Inject,
-  Param,
   Post,
+  Query,
 } from '@nestjs/common';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import {
@@ -44,7 +44,7 @@ export class UserV1Controller {
   @Get('get-by-id')
   @ApiResponse({ status: HttpStatus.CREATED, type: UserDTO })
   async getUserById(
-    @Param() id: number,
+    @Query('id') id: number,
   ): Promise<SuccessApiResponseDTO<UserDTO> | ErrorApiResponseDTO> {
     const result = await this.userService.getUserById(id);
     if (result.ok) {

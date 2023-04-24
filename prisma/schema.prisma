@@ -2,18 +2,45 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
   binaryTargets = ["native", "linux-musl", "debian-openssl-1.1.x", "linux-musl-openssl-3.0.x"]
 }
 
 datasource db {
-  provider      = "postgresql"
-  url           = env("DB_URL")
+  provider = "postgresql"
+  url      = env("DB_URL")
 }
 
 model User {
-  id    Int     @default(autoincrement()) @id
-  username  String
-  email  String @unique
+  id       Int        @id @default(autoincrement())
+  username String
+  email    String     @unique
+  Message  Message[]
+  RoomUser RoomUser[]
 }
 
+model Chatroom {
+  id       Int        @id @default(autoincrement())
+  name     String     @unique
+  messages Message[]
+  RoomUser RoomUser[]
+}
+
+model Message {
+  id         Int      @id @default(autoincrement())
+  name       String   @unique
+  sender     User     @relation(fields: [senderId], references: [id])
+  senderId   Int
+  chatroom   Chatroom @relation(fields: [chatroomId], references: [id])
+  chatroomId Int
+  createdAt  DateTime @default(now())
+}
+
+model RoomUser {
+  user       User     @relation(fields: [userId], references: [id])
+  userId     Int
+  chatroom   Chatroom @relation(fields: [chatroomId], references: [id])
+  chatroomId Int
+
+  @@id([userId, chatroomId])
+}

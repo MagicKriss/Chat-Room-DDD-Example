@@ -1,9 +1,18 @@
-import { Body, Controller, HttpStatus, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpStatus,
+  Inject,
+  Post,
+  Query,
+} from '@nestjs/common';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import {
   ErrorApiResponseDTO,
   SuccessApiResponseDTO,
 } from 'src/api-utils/api.responses';
+import { CHATROOM_SERVICE } from '../chatroom-service.factory';
 import { IChatroomService } from '../chatroom-service.interface';
 import { ChatroomDTO, CreateChatroomRequestDTO } from '../chatroom.dto';
 import { MessageDto } from '../message.dto';
@@ -11,7 +20,10 @@ import { MessageDto } from '../message.dto';
 @ApiTags('chat')
 @Controller({ path: 'chat', version: '1' })
 export class ChatroomV1Controller {
-  constructor(private readonly chatroomService: IChatroomService) {}
+  constructor(
+    @Inject(CHATROOM_SERVICE)
+    private readonly chatroomService: IChatroomService,
+  ) {}
 
   @Post('new')
   @ApiResponse({ status: HttpStatus.CREATED, type: CreateChatroomRequestDTO })
@@ -76,10 +88,10 @@ export class ChatroomV1Controller {
     return response;
   }
 
-  @Post('get-latest-messages')
+  @Get('get-latest-messages')
   async getLatestRoomMessages(
-    @Body('roomId') roomId: number,
-    @Body('count') count: number,
+    @Query('roomId') roomId: number,
+    @Query('count') count: number,
   ) {
     const result = await this.chatroomService.getLatestRoomMessages(
       roomId,
