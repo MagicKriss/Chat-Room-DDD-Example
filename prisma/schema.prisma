@@ -28,7 +28,7 @@ model Chatroom {
 
 model Message {
   id         Int      @id @default(autoincrement())
-  message    String   @unique
+  message    String   
   sender     User     @relation(fields: [senderId], references: [id])
   senderId   Int
   chatroom   Chatroom @relation(fields: [chatroomId], references: [id])
