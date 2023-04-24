@@ -2,6 +2,7 @@ import { UserDTO, UserRequestDTO } from './user.dto';
 
 export interface IUserService {
   createUser(user: UserRequestDTO): Promise<UserDTO>;
-  exists(id: number): Promise<boolean>;
+  existsUserWIthId(id: number): Promise<boolean>;
+  existsUserWithEmail(email: string): Promise<boolean>;
   getUser(id: number): Promise<UserDTO | null>;
 }

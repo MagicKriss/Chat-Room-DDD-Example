@@ -13,10 +13,16 @@ export class UserService implements IUserService {
   createUser(user: UserRequestDTO): Promise<UserDTO> {
     return this.userStorage.createUser(user);
   }
-  exists(id: number): Promise<boolean> {
-    return this.userStorage.userExists(id);
+
+  existsUserWIthId(id: number): Promise<boolean> {
+    return this.userStorage.userExistsById(id);
   }
+
+  existsUserWithEmail(email: string): Promise<boolean> {
+    return this.userStorage.userExistsByEmail(email);
+  }
+
   getUser(id: number): Promise<UserDTO | null> {
-    return this.userStorage.getUser(id);
+    return this.userStorage.getUserById(id);
   }
 }

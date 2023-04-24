@@ -3,6 +3,7 @@ import { z } from 'nestjs-zod/z';
 
 const UserBaseSchema = z.object({
   username: z.string().describe('Username of the user'),
+  email: z.string().email().describe('Unique email of the user'),
 });
 const CreatedUserSchema = UserBaseSchema.extend({
   id: z.number().int().describe('Unique identifier for the user'),

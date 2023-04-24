@@ -7,11 +7,16 @@ import { IUserStorage } from './user-storage.interface';
 export class UserStorageService implements IUserStorage {
   constructor(private readonly prisma: PrismaService) {}
 
-  async getUser(id: number): Promise<UserDTO | null> {
-    const prismaUser = await this.prisma.user.findUnique({
+  async getUserById(id: number): Promise<UserDTO | null> {
+    return this.prisma.user.findUnique({
       where: { id },
     });
-    return prismaUser;
+  }
+
+  async getUserByEmail(email: string): Promise<UserDTO | null> {
+    return this.prisma.user.findUnique({
+      where: { email },
+    });
   }
 
   async createUser(data: UserRequestDTO): Promise<UserDTO> {
@@ -20,8 +25,13 @@ export class UserStorageService implements IUserStorage {
     });
   }
 
-  async userExists(id: number): Promise<boolean> {
-    const user = await this.getUser(id);
+  async userExistsById(id: number): Promise<boolean> {
+    const user = await this.getUserById(id);
+    return !!user;
+  }
+
+  async userExistsByEmail(email: string): Promise<boolean> {
+    const user = await this.getUserByEmail(email);
     return !!user;
   }
 }
