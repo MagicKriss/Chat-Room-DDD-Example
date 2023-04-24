@@ -14,8 +14,16 @@ import {
 } from 'src/api-utils/api.responses';
 import { CHATROOM_SERVICE } from '../chatroom-service.factory';
 import { IChatroomService } from '../chatroom-service.interface';
-import { ChatroomDTO, CreateChatroomRequestDTO } from '../chatroom.dto';
-import { MessageDto } from '../message.dto';
+import {
+  AddUserToRoomRequestDTO,
+  ChatroomDTO,
+  CreateChatroomRequestDTO,
+} from '../chatroom.dto';
+import {
+  GetLatestMessagesRequestDto,
+  MessageDto,
+  SendMessageRequestDto,
+} from '../message.dto';
 
 @ApiTags('chat')
 @Controller({ path: 'chat', version: '1' })
@@ -44,20 +52,16 @@ export class ChatroomV1Controller {
     }
   }
 
-  //  Add User To Room
   @Post('add-user')
-  async addUserToRoom(
-    @Body('userId') userId: number,
-    @Body('roomId') roomId: number,
-  ) {
-    const result = await this.chatroomService.addUserToRoom(userId, roomId);
+  @ApiResponse({ status: HttpStatus.CREATED, type: AddUserToRoomRequestDTO })
+  async addUserToRoom(@Body() body: AddUserToRoomRequestDTO) {
+    const result = await this.chatroomService.addUserToRoom(body);
     if (result.ok) {
       const response = new SuccessApiResponseDTO<boolean>()
         .setStatus(HttpStatus.CREATED)
         .setData(result.value);
       return response;
     }
-    // Success
     const response = new ErrorApiResponseDTO()
       .setStatus(HttpStatus.BAD_REQUEST)
       .setMessage(result.error.message);
@@ -65,23 +69,14 @@ export class ChatroomV1Controller {
   }
 
   @Post('send-message')
-  async sendMessageToRoom(
-    @Body('userId') userId: number,
-    @Body('roomId') roomId: number,
-    @Body('message') message: string,
-  ) {
-    const result = await this.chatroomService.sendMessageToRoom(
-      userId,
-      roomId,
-      message,
-    );
+  async sendMessageToRoom(@Body() body: SendMessageRequestDto) {
+    const result = await this.chatroomService.sendMessageToRoom(body);
     if (result.ok) {
       const response = new SuccessApiResponseDTO<MessageDto>()
         .setStatus(HttpStatus.CREATED)
         .setData(result.value);
       return response;
     }
-    // Success
     const response = new ErrorApiResponseDTO()
       .setStatus(HttpStatus.BAD_REQUEST)
       .setMessage(result.error.message);
@@ -89,21 +84,18 @@ export class ChatroomV1Controller {
   }
 
   @Get('get-latest-messages')
-  async getLatestRoomMessages(
-    @Query('roomId') roomId: number,
-    @Query('count') count: number,
-  ) {
+  @ApiResponse({ status: HttpStatus.OK, type: MessageDto, isArray: true })
+  async getLatestRoomMessages(@Query() query: GetLatestMessagesRequestDto) {
     const result = await this.chatroomService.getLatestRoomMessages(
-      roomId,
-      count,
+      query.roomId,
+      query.count,
     );
     if (result.ok) {
       const response = new SuccessApiResponseDTO<MessageDto[]>()
-        .setStatus(HttpStatus.CREATED)
+        .setStatus(HttpStatus.OK)
         .setData(result.value);
       return response;
     }
-    // Success
     const response = new ErrorApiResponseDTO()
       .setStatus(HttpStatus.BAD_REQUEST)
       .setMessage(result.error.message);

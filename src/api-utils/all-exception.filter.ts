@@ -11,6 +11,7 @@ import { ErrorApiResponseDTO } from './api.responses';
 @Catch()
 export class AllExceptionFilter implements ExceptionFilter {
   catch(exception: Error, host: ArgumentsHost) {
+    console.error(exception);
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const dtoError = new ErrorApiResponseDTO();

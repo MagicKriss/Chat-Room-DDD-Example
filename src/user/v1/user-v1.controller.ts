@@ -42,19 +42,35 @@ export class UserV1Controller {
   }
 
   @Get('get-by-id')
-  @ApiResponse({ status: HttpStatus.CREATED, type: UserDTO })
+  @ApiResponse({ status: HttpStatus.OK, type: UserDTO })
   async getUserById(
     @Query('id') id: number,
   ): Promise<SuccessApiResponseDTO<UserDTO> | ErrorApiResponseDTO> {
     const result = await this.userService.getUserById(id);
     if (result.ok) {
       const response = new SuccessApiResponseDTO<UserDTO>()
-        .setStatus(HttpStatus.CREATED)
+        .setStatus(HttpStatus.OK)
         .setData(result.value);
       return response;
     }
     const response = new ErrorApiResponseDTO()
-      .setStatus(HttpStatus.BAD_REQUEST)
+      .setStatus(HttpStatus.NOT_FOUND)
+      .setMessage(result.error.message);
+    return response;
+  }
+
+  @Get('get-by-email')
+  @ApiResponse({ status: HttpStatus.OK, type: UserDTO })
+  async getUserByEmail(@Query('email') email: string) {
+    const result = await this.userService.getUserByEmail(email);
+    if (result.ok) {
+      const response = new SuccessApiResponseDTO<UserDTO>()
+        .setStatus(HttpStatus.OK)
+        .setData(result.value);
+      return response;
+    }
+    const response = new ErrorApiResponseDTO()
+      .setStatus(HttpStatus.NOT_FOUND)
       .setMessage(result.error.message);
     return response;
   }

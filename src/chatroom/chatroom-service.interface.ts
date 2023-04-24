@@ -1,20 +1,30 @@
 import { Result } from 'src/api-utils/result.type';
-import { ChatroomDTO, CreateChatroomRequestDTO } from './chatroom.dto';
-import { MessageDto } from './message.dto';
+import {
+  AddUserToRoomRequestDTO,
+  ChatroomDTO,
+  CreateChatroomRequestDTO,
+} from './chatroom.dto';
+import {
+  AddUserToRoomException,
+  CreateChatroomException,
+  GetLatestMessagesException,
+  SendMessageException,
+} from './chatroom.exceptions';
+import { MessageDto, SendMessageRequestDto } from './message.dto';
 
 // TODO add custom error types
 export interface IChatroomService {
   createChatroom(
     chatroom: CreateChatroomRequestDTO,
-  ): Promise<Result<ChatroomDTO, Error>>;
-  addUserToRoom(userId: number, roomId: number): Promise<Result<true, Error>>;
+  ): Promise<Result<ChatroomDTO, CreateChatroomException>>;
+  addUserToRoom(
+    body: AddUserToRoomRequestDTO,
+  ): Promise<Result<true, AddUserToRoomException>>;
   sendMessageToRoom(
-    userId: number,
-    roomId: number,
-    message: string,
-  ): Promise<Result<MessageDto, Error>>;
+    body: SendMessageRequestDto,
+  ): Promise<Result<MessageDto, SendMessageException>>;
   getLatestRoomMessages(
     roomId: number,
     count: number,
-  ): Promise<Result<MessageDto[], Error>>;
+  ): Promise<Result<MessageDto[], GetLatestMessagesException>>;
 }

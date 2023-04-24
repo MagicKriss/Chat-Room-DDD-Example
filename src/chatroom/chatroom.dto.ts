@@ -14,3 +14,20 @@ export class CreateChatroomRequestDTO extends createZodDto(
   ChatroomBaseSchema,
 ) {}
 export class ChatroomDTO extends createZodDto(CreatedChatroomSchema) {}
+
+const AddUserToRoomSchema = z.object({
+  userId: z
+    .number()
+    .int()
+    .positive()
+    .describe('Unique identifier for the user'),
+  roomId: z
+    .number()
+    .int()
+    .positive()
+    .describe('Unique identifier for the chatroom'),
+});
+
+export class AddUserToRoomRequestDTO extends createZodDto(
+  AddUserToRoomSchema,
+) {}

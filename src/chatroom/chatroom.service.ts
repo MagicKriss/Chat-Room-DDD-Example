@@ -4,11 +4,23 @@ import { CHATROOM_STORAGE } from 'src/storage/chatroom-storage/chatroom-storage-
 import { IChatroomStorage } from 'src/storage/chatroom-storage/chatroom-storage.interface';
 import { MESSAGE_STORAGE } from 'src/storage/message-storage/message-storage-service.factory';
 import { IMessageStorage } from 'src/storage/message-storage/message-storage.interface';
-import { USER_SERVICE } from 'src/user/user-service.factory';
-import { IUserService } from 'src/user/user-service.interface';
 import { IChatroomService } from './chatroom-service.interface';
-import { ChatroomDTO, CreateChatroomRequestDTO } from './chatroom.dto';
-import { MessageDto } from './message.dto';
+import {
+  AddUserToRoomRequestDTO,
+  ChatroomDTO,
+  CreateChatroomRequestDTO,
+} from './chatroom.dto';
+import {
+  AddUserToRoomException,
+  CreateChatroomException,
+  FailedToFetchLatestMessagesException,
+  FailedToSenndMessageException,
+  GetLatestMessagesException,
+  RoomDoesNotExistException,
+  SendMessageException,
+  UserNotInRoomException,
+} from './chatroom.exceptions';
+import { MessageDto, SendMessageRequestDto } from './message.dto';
 
 @Injectable()
 export class ChatroomService implements IChatroomService {
@@ -17,63 +29,35 @@ export class ChatroomService implements IChatroomService {
     private readonly chatroomStorage: IChatroomStorage,
     @Inject(MESSAGE_STORAGE)
     private readonly messageStorage: IMessageStorage,
-    @Inject(USER_SERVICE)
-    private readonly userService: IUserService,
   ) {}
   async createChatroom(
     chatroom: CreateChatroomRequestDTO,
-  ): Promise<Result<ChatroomDTO, Error>> {
-    const newRoom = await this.chatroomStorage.createChatroom(chatroom);
-    if (!newRoom) {
-      return Err(new Error('Failed to create chatroom'));
-    }
-    return Ok(newRoom);
+  ): Promise<Result<ChatroomDTO, CreateChatroomException>> {
+    return this.chatroomStorage.createChatroom(chatroom);
   }
 
-  async addUserToRoom(
-    userId: number,
-    roomId: number,
-  ): Promise<Result<true, Error>> {
-    // First asssume that room and user exists and that user is not already in room
-    const added = await this.chatroomStorage.addUserToRoom(userId, roomId);
-    if (added) {
-      return Ok(true);
-    }
-
-    // Check and return reason why adding user failed
-    const [userExists, userInRoom, roomExists] = await Promise.all([
-      this.userService.existsUserWIthId(userId),
-      this.chatroomStorage.userIsInRoom(userId, roomId),
-      this.chatroomStorage.roomExists(roomId),
-    ]);
-    if (!userExists) {
-      return Err(new Error('User does not exist'));
-    }
-    if (userInRoom) {
-      return Err(new Error('User is already added to room'));
-    }
-    if (!roomExists) {
-      return Err(new Error('Room does not exist'));
-    }
-
-    return Err(new Error('Failed to add user to room'));
+  addUserToRoom({
+    userId,
+    roomId,
+  }: AddUserToRoomRequestDTO): Promise<Result<true, AddUserToRoomException>> {
+    return this.chatroomStorage.addUserToRoom(userId, roomId);
   }
 
-  async sendMessageToRoom(
-    userId: number,
-    roomId: number,
-    message: string,
-  ): Promise<Result<MessageDto, Error>> {
+  async sendMessageToRoom({
+    userId,
+    roomId,
+    message,
+  }: SendMessageRequestDto): Promise<Result<MessageDto, SendMessageException>> {
     // First checking if such room exists and user is joined room
     const [roomExists, userInRoom] = await Promise.all([
       this.chatroomStorage.roomExists(roomId),
       this.chatroomStorage.userIsInRoom(userId, roomId),
     ]);
     if (!roomExists) {
-      return Err(new Error('Room does not exist'));
+      return Err(new RoomDoesNotExistException());
     }
     if (!userInRoom) {
-      return Err(new Error('User is not in room'));
+      return Err(new UserNotInRoomException());
     }
     const createdMesasge = await this.messageStorage.sendMessage(
       userId,
@@ -81,7 +65,7 @@ export class ChatroomService implements IChatroomService {
       message,
     );
     if (!createdMesasge) {
-      return Err(new Error('Failed to send message'));
+      return Err(new FailedToSenndMessageException());
     }
     return Ok(createdMesasge);
   }
@@ -89,10 +73,10 @@ export class ChatroomService implements IChatroomService {
   async getLatestRoomMessages(
     roomId: number,
     count: number,
-  ): Promise<Result<MessageDto[], Error>> {
+  ): Promise<Result<MessageDto[], GetLatestMessagesException>> {
     const messages = await this.messageStorage.getLatestMessages(roomId, count);
     if (!messages) {
-      return Err(new Error('Failed to get messages'));
+      return Err(new FailedToFetchLatestMessagesException());
     }
     return Ok(messages);
   }

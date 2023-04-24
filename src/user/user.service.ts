@@ -4,6 +4,11 @@ import { USER_STORAGE } from 'src/storage/user-storage/user-storage-service.fact
 import { IUserStorage } from 'src/storage/user-storage/user-storage.interface';
 import { IUserService } from './user-service.interface';
 import { UserDTO, UserRequestDTO } from './user.dto';
+import {
+  UserCreateException,
+  UserGetException,
+  UserNotFoundException,
+} from './user.exceptions';
 
 @Injectable()
 export class UserService implements IUserService {
@@ -11,12 +16,10 @@ export class UserService implements IUserService {
     @Inject(USER_STORAGE) private readonly userStorage: IUserStorage,
   ) {}
 
-  async createUser(user: UserRequestDTO): Promise<Result<UserDTO, Error>> {
-    const newUser = await this.userStorage.createUser(user);
-    if (!newUser) {
-      return Err(new Error('Failed to create user'));
-    }
-    return Ok(newUser);
+  createUser(
+    user: UserRequestDTO,
+  ): Promise<Result<UserDTO, UserCreateException>> {
+    return this.userStorage.createUser(user);
   }
 
   existsUserWIthId(id: number): Promise<boolean> {
@@ -27,18 +30,20 @@ export class UserService implements IUserService {
     return this.userStorage.userExistsByEmail(email);
   }
 
-  async getUserById(id: number): Promise<Result<UserDTO, Error>> {
+  async getUserById(id: number): Promise<Result<UserDTO, UserGetException>> {
     const user = await this.userStorage.getUserById(id);
     if (!user) {
-      return Err(new Error('User not found'));
+      return Err(new UserNotFoundException());
     }
     return Ok(user);
   }
 
-  async getUserByEmail(email: string): Promise<Result<UserDTO, Error>> {
+  async getUserByEmail(
+    email: string,
+  ): Promise<Result<UserDTO, UserGetException>> {
     const user = await this.userStorage.getUserByEmail(email);
     if (!user) {
-      return Err(new Error('User not found'));
+      return Err(new UserNotFoundException());
     }
     return Ok(user);
   }

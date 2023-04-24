@@ -1,21 +1,33 @@
 import { Injectable } from '@nestjs/common';
 import { MessageDto } from 'src/chatroom/message.dto';
 import { PrismaService } from '../prisma-service/prisma.service';
+import { mapMessageToMessageDTO } from './helper';
 import { IMessageStorage } from './message-storage.interface';
 
 @Injectable()
 export class MessageStorageService implements IMessageStorage {
   constructor(private readonly prisma: PrismaService) {}
 
-  sendMessage(
+  async sendMessage(
     userId: number,
     roomId: number,
     message: string,
   ): Promise<MessageDto> {
-    throw new Error('Method not implemented.');
+    const createdMessage = await this.prisma.message.create({
+      data: { message, senderId: userId, chatroomId: roomId },
+    });
+    return mapMessageToMessageDTO(createdMessage);
   }
 
-  getLatestMessages(roomId: number, count: number): Promise<MessageDto[]> {
-    throw new Error('Method not implemented.');
+  async getLatestMessages(
+    chatroomId: number,
+    count: number,
+  ): Promise<MessageDto[]> {
+    const messages = await this.prisma.message.findMany({
+      where: { chatroomId },
+      take: count,
+    });
+
+    return messages.map(mapMessageToMessageDTO);
   }
 }
