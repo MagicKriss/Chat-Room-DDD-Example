@@ -14,6 +14,7 @@ function swaggerSetup(app: INestApplication) {
     .setDescription('The Chat Room API description')
     .setVersion('1.0')
     .addTag('user')
+    .addTag('chat')
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup(GLOBAL_API_PREFIX, app, document);

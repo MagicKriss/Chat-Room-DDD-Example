@@ -4,6 +4,7 @@ import { APP_PIPE } from '@nestjs/core';
 import { ZodValidationPipe } from 'nestjs-zod';
 import { StorageModule } from './storage/storage.module';
 import { UserModule } from './user/user.module';
+import { ChatroomModule } from './chatroom/chatroom.module';
 
 @Module({
   providers: [
@@ -16,6 +17,7 @@ import { UserModule } from './user/user.module';
     ConfigModule.forRoot({ cache: true, isGlobal: true }),
     UserModule,
     StorageModule,
+    ChatroomModule,
   ],
   controllers: [],
 })
