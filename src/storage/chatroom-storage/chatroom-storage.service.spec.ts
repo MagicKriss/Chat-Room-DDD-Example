@@ -4,7 +4,6 @@ import { ChatroomStorageService } from './chatroom-storage.service';
 
 describe('ChatroomStorageService', () => {
   let service: ChatroomStorageService;
-
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [PrismaService, ChatroomStorageService],

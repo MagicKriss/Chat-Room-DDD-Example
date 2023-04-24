@@ -57,7 +57,6 @@ export class ChatroomStorageService implements IChatroomStorage {
       return Err(new FailedToAddUserToRoomException());
     } catch (e) {
       if (e instanceof Prisma.PrismaClientKnownRequestError) {
-        console.log('E', e.meta);
         switch (e.code) {
           case 'P2002':
             return Err(new UsearAlreadyInRoomException());
