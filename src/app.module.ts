@@ -2,9 +2,9 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_PIPE } from '@nestjs/core';
 import { ZodValidationPipe } from 'nestjs-zod';
+import { ChatroomModule } from './chatroom/chatroom.module';
 import { StorageModule } from './storage/storage.module';
 import { UserModule } from './user/user.module';
-import { ChatroomModule } from './chatroom/chatroom.module';
 
 @Module({
   providers: [

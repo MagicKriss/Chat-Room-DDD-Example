@@ -1,17 +1,16 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
   HttpStatus,
   Inject,
+  NotFoundException,
   Post,
   Query,
 } from '@nestjs/common';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
-import {
-  ErrorApiResponseDTO,
-  SuccessApiResponseDTO,
-} from 'src/api-utils/api.responses';
+
 import { USER_SERVICE } from '../user-service.factory';
 import { IUserService } from '../user-service.interface';
 import {
@@ -30,47 +29,28 @@ export class UserV1Controller {
 
   @Post('new')
   @ApiResponse({ status: HttpStatus.CREATED, type: UserDTO })
-  async createUser(
-    @Body() user: UserRequestDTO,
-  ): Promise<SuccessApiResponseDTO<UserDTO> | ErrorApiResponseDTO> {
+  async createUser(@Body() user: UserRequestDTO): Promise<UserDTO> {
     const result = await this.userService.createUser(user);
     if (result.ok) {
-      const response = new SuccessApiResponseDTO<UserDTO>()
-        .setStatus(HttpStatus.CREATED)
-        .setData(result.value);
-      return response;
+      return result.value;
     }
-    const response = new ErrorApiResponseDTO()
-      .setStatus(HttpStatus.BAD_REQUEST)
-      .setMessage(result.error.message);
-    return response;
+    throw new BadRequestException(result.error.message);
   }
 
   @Get('get-by-id')
   @ApiResponse({ status: HttpStatus.OK, type: UserDTO })
-  async getUserById(
-    @Query('id') inputId: number,
-  ): Promise<SuccessApiResponseDTO<UserDTO> | ErrorApiResponseDTO> {
+  async getUserById(@Query('id') inputId: number): Promise<UserDTO> {
     const parsedId = parseUserId(inputId);
 
     if (!parsedId.ok) {
-      const response = new ErrorApiResponseDTO()
-        .setStatus(HttpStatus.BAD_REQUEST)
-        .setMessage(parsedId.error);
-      return response;
+      throw new BadRequestException(parsedId.error);
     }
     const id = parsedId.value;
     const result = await this.userService.getUserById(id);
     if (result.ok) {
-      const response = new SuccessApiResponseDTO<UserDTO>()
-        .setStatus(HttpStatus.OK)
-        .setData(result.value);
-      return response;
+      return result.value;
     }
-    const response = new ErrorApiResponseDTO()
-      .setStatus(HttpStatus.NOT_FOUND)
-      .setMessage(result.error.message);
-    return response;
+    throw new NotFoundException(result.error.message);
   }
 
   @Get('get-by-email')
@@ -78,23 +58,14 @@ export class UserV1Controller {
   async getUserByEmail(@Query('email') inputEmail: string) {
     const parsedEmail = parseUserEmail(inputEmail);
     if (!parsedEmail.ok) {
-      const response = new ErrorApiResponseDTO()
-        .setStatus(HttpStatus.BAD_REQUEST)
-        .setMessage(parsedEmail.error);
-      return response;
+      throw new BadRequestException(parsedEmail.error);
     }
     const email = parsedEmail.value;
 
     const result = await this.userService.getUserByEmail(email);
     if (result.ok) {
-      const response = new SuccessApiResponseDTO<UserDTO>()
-        .setStatus(HttpStatus.OK)
-        .setData(result.value);
-      return response;
+      return result.value;
     }
-    const response = new ErrorApiResponseDTO()
-      .setStatus(HttpStatus.NOT_FOUND)
-      .setMessage(result.error.message);
-    return response;
+    throw new NotFoundException(result.error.message);
   }
 }

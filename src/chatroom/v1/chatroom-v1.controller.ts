@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
@@ -8,10 +9,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
-import {
-  ErrorApiResponseDTO,
-  SuccessApiResponseDTO,
-} from 'src/api-utils/api.responses';
+
 import { CHATROOM_SERVICE } from '../chatroom-service.factory';
 import { IChatroomService } from '../chatroom-service.interface';
 import {
@@ -38,19 +36,12 @@ export class ChatroomV1Controller {
   @ApiResponse({ status: HttpStatus.CREATED, type: CreateChatroomRequestDTO })
   async createChatroom(
     @Body() chatroom: CreateChatroomRequestDTO,
-  ): Promise<SuccessApiResponseDTO<ChatroomDTO> | ErrorApiResponseDTO> {
-    const newRoomResult = await this.chatroomService.createChatroom(chatroom);
-    if (newRoomResult.ok) {
-      const response = new SuccessApiResponseDTO<ChatroomDTO>()
-        .setStatus(HttpStatus.CREATED)
-        .setData(newRoomResult.value);
-      return response;
-    } else {
-      const response = new ErrorApiResponseDTO()
-        .setStatus(HttpStatus.BAD_REQUEST)
-        .setMessage(newRoomResult.error.message);
-      return response;
+  ): Promise<ChatroomDTO> {
+    const result = await this.chatroomService.createChatroom(chatroom);
+    if (result.ok) {
+      return result.value;
     }
+    throw new BadRequestException(result.error.message);
   }
 
   @Post('add-user')
@@ -58,30 +49,18 @@ export class ChatroomV1Controller {
   async addUserToRoom(@Body() body: AddUserToRoomRequestDTO) {
     const result = await this.chatroomService.addUserToRoom(body);
     if (result.ok) {
-      const response = new SuccessApiResponseDTO<boolean>()
-        .setStatus(HttpStatus.CREATED)
-        .setData(result.value);
-      return response;
+      return result.value;
     }
-    const response = new ErrorApiResponseDTO()
-      .setStatus(HttpStatus.BAD_REQUEST)
-      .setMessage(result.error.message);
-    return response;
+    throw new BadRequestException(result.error.message);
   }
 
   @Post('send-message')
   async sendMessageToRoom(@Body() body: SendMessageRequestDto) {
     const result = await this.chatroomService.sendMessageToRoom(body);
     if (result.ok) {
-      const response = new SuccessApiResponseDTO<MessageDto>()
-        .setStatus(HttpStatus.CREATED)
-        .setData(result.value);
-      return response;
+      return result.value;
     }
-    const response = new ErrorApiResponseDTO()
-      .setStatus(HttpStatus.BAD_REQUEST)
-      .setMessage(result.error.message);
-    return response;
+    throw new BadRequestException(result.error.message);
   }
 
   @Get('get-latest-messages')
@@ -92,17 +71,11 @@ export class ChatroomV1Controller {
   ) {
     const parsedRoomId = parseId(inputRoomId);
     if (!parsedRoomId.ok) {
-      const response = new ErrorApiResponseDTO()
-        .setStatus(HttpStatus.BAD_REQUEST)
-        .setMessage(parsedRoomId.error);
-      return response;
+      throw new BadRequestException(parsedRoomId.error);
     }
     const parsedCount = parseMessageCount(inputCount);
     if (!parsedCount.ok) {
-      const response = new ErrorApiResponseDTO()
-        .setStatus(HttpStatus.BAD_REQUEST)
-        .setMessage(parsedCount.error);
-      return response;
+      throw new BadRequestException(parsedCount.error);
     }
 
     const roomId = parsedRoomId.value;
@@ -112,14 +85,8 @@ export class ChatroomV1Controller {
       count,
     );
     if (result.ok) {
-      const response = new SuccessApiResponseDTO<MessageDto[]>()
-        .setStatus(HttpStatus.OK)
-        .setData(result.value);
-      return response;
+      return result.value;
     }
-    const response = new ErrorApiResponseDTO()
-      .setStatus(HttpStatus.BAD_REQUEST)
-      .setMessage(result.error.message);
-    return response;
+    throw new BadRequestException(result.error.message);
   }
 }
