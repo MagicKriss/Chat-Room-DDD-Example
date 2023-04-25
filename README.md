@@ -9,9 +9,14 @@ To initialize the repository run the following command:
 
 ```bash
 pnpm install &&\
-pnpm exec prisma generate &&\
+pnpm exec prisma generate
+```
+
+And oce the DB is running, run the migration:
+```bash
 pnpm exec prisma migrate dev
 ```
+>Note! If running from localhost, use [local.env](./local.env) for correct DB connection string
 
 [PnPm](https://pnpm.io/) is used as a more modern and efficient substitute for npm
 
