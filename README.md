@@ -12,7 +12,7 @@ pnpm install &&\
 pnpm exec prisma generate
 ```
 
-And oce the DB is running, run the migration:
+And once the DB is running, run the migration:
 ```bash
 pnpm exec prisma migrate dev
 ```
