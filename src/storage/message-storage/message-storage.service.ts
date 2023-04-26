@@ -26,6 +26,7 @@ export class MessageStorageService implements IMessageStorage {
     const messages = await this.prisma.message.findMany({
       where: { chatroomId },
       take: count,
+      orderBy: { createdAt: 'desc' },
     });
 
     return messages.map(mapMessageToMessageDTO);

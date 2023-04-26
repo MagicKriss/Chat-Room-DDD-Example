@@ -28,12 +28,14 @@ model Chatroom {
 
 model Message {
   id         Int      @id @default(autoincrement())
-  message    String   
+  message    String
   sender     User     @relation(fields: [senderId], references: [id])
   senderId   Int
   chatroom   Chatroom @relation(fields: [chatroomId], references: [id])
   chatroomId Int
   createdAt  DateTime @default(now())
+
+  @@index([chatroomId, createdAt(sort: Desc)])
 }
 
 model RoomUser {
